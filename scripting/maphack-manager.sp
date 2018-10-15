@@ -47,7 +47,7 @@ public void OnPluginStart()
  
 public void OnSvMaphacksChange(ConVar convar, char[] oldValue, char[] newValue)
 {
-	if(overrideNative.BoolValue && StringToInt(newValue) < 2)
+	if(overrideNative.BoolValue && StringToInt(newValue) == 0)
 	{
 		convar.IntValue = 0;
 		char convarName[PLATFORM_MAX_PATH];
