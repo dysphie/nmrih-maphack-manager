@@ -47,7 +47,7 @@ public void OnPluginStart()
  
 public void OnSvMaphacksChange(ConVar convar, char[] oldValue, char[] newValue)
 {
-	if(overrideNative.BoolValue)
+	if(overrideNative.BoolValue && StringToInt(newValue) < 2)
 	{
 		convar.IntValue = 0;
 		char convarName[PLATFORM_MAX_PATH];
@@ -76,7 +76,6 @@ public void OnMapReset(Event event, const char[] name, bool dontBroadcast)
 		GetArrayString(activeMaphacks, i, buffer, sizeof(buffer));
 		ServerCommand("maphack_load \"%s/%s\"", maphackLibrary, buffer);
 		PrintToServer("%s Loading maphack from file \"%s/%s\"", PLUGIN_PREFIX, maphackLibrary, buffer);
-
 	}
 }
 
