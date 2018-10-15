@@ -21,3 +21,5 @@ A SourceMod alternative to native maphack management
 ### Directory Structure Example:
 
 Given the map `nmo_cabin`, the maphacks with a green tick will execute every round:
+
+![Example](README-example.png)
