@@ -70,12 +70,13 @@ public void OnMapStart()
 
 public void OnMapReset(Event event, const char[] name, bool dontBroadcast)
 {
-
 	char buffer[PLATFORM_MAX_PATH];
 	for(int i=0; i<GetArraySize(activeMaphacks); i++ )
 	{
 		GetArrayString(activeMaphacks, i, buffer, sizeof(buffer));
 		ServerCommand("maphack_load \"%s/%s\"", maphackLibrary, buffer);
+		PrintToServer("%s Loading maphack from file \"%s/%s\"", PLUGIN_PREFIX, maphackLibrary, buffer);
+
 	}
 }
 
@@ -83,7 +84,7 @@ int GetMaphacksFromFolder(const char[] directory)
 {
 	int count;
 	char path[PLATFORM_MAX_PATH];
-	Format(path, sizeof(path), "%s/%s", maphackLibrary, directory);   //Format absolute path
+	FormatEx(path, sizeof(path), "%s/%s", maphackLibrary, directory);   //Format absolute path
 
 	if(!DirExists(path))
 		return 0;
@@ -99,7 +100,7 @@ int GetMaphacksFromFolder(const char[] directory)
 			continue;
 		}
 
-		Format(path, sizeof(path), "%s/%s", directory, entryName); //Format relative path
+		FormatEx(path, sizeof(path), "%s/%s", directory, entryName); //Format relative path
 
 		if(type == FileType_Directory)
 		{
