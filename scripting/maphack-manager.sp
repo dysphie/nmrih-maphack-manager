@@ -5,7 +5,7 @@
 #define CVAR_MAXLEN 64
 #define PLUGIN_PREFIX "[MaphackManager]"
 
-Handle activeMaphacks;
+ArrayList activeMaphacks;
 ConVar pluginDirectory;
 ConVar overrideNative;
 ConVar svMaphacks;
@@ -34,11 +34,11 @@ public void OnPluginStart()
 	else
 		SetFailState("%s Unsupported game version. Must be 1.10.0 or higher.", PLUGIN_PREFIX);
 
-	activeMaphacks = CreateArray(ByteCountToCells(PLATFORM_MAX_PATH)); 
+	activeMaphacks = new ArrayList(ByteCountToCells(PLATFORM_MAX_PATH)); 
 	HookEvent("nmrih_reset_map", OnMapReset, EventHookMode_PostNoCopy);
 
 	char directory[PLATFORM_MAX_PATH];
-	GetConVarString(pluginDirectory, directory, sizeof(directory));
+	pluginDirectory.GetString(directory, sizeof(directory));
 	BuildPath(Path_SM, maphackLibrary, sizeof(maphackLibrary), "%s", directory);
 	
 	if(!DirExists(maphackLibrary))
@@ -51,14 +51,14 @@ public void OnSvMaphacksChange(ConVar convar, char[] oldValue, char[] newValue)
 	{
 		convar.IntValue = 0;
 		char convarName[PLATFORM_MAX_PATH];
-		GetConVarName(overrideNative, convarName, sizeof(convarName));
+		overrideNative.GetName(convarName, sizeof(convarName));
 		PrintToServer("%s Can't set sv_maphack to 1, unless the server has %s set to 0.", PLUGIN_PREFIX, convarName);
 	}
 }
 
 public void OnPluginDirectoryChange(ConVar convar, char[] oldValue, char[] newValue)
 {
-	ClearArray(activeMaphacks);
+	activeMaphacks.Clear();
 	PrintToServer("%s Path to maphack library changed, re-scanning...", PLUGIN_PREFIX);
 	GetMaphacksForCurrentLevel();
 }
@@ -71,9 +71,10 @@ public void OnMapStart()
 public void OnMapReset(Event event, const char[] name, bool dontBroadcast)
 {
 	char buffer[PLATFORM_MAX_PATH];
-	for(int i=0; i<GetArraySize(activeMaphacks); i++ )
+	int len = activeMaphacks.Length;
+	for(int i = 0; i < len; i++)
 	{
-		GetArrayString(activeMaphacks, i, buffer, sizeof(buffer));
+		activeMaphacks.GetString(i, buffer, sizeof(buffer));
 		ServerCommand("maphack_load \"%s/%s\"", maphackLibrary, buffer);
 		PrintToServer("%s Loading maphack from file \"%s/%s\"", PLUGIN_PREFIX, maphackLibrary, buffer);
 	}
@@ -88,10 +89,10 @@ int GetMaphacksFromFolder(const char[] directory)
 	if(!DirExists(path))
 		return 0;
 	
-	Handle listing = OpenDirectory(path);
+	DirectoryListing listing = OpenDirectory(path);
 	FileType type; 
 	char entryName[PLATFORM_MAX_PATH];
-	while(ReadDirEntry(listing, entryName, sizeof(entryName), type))
+	while(listing.GetNext(entryName, sizeof(entryName), type))
 	{
 		if(StrEqual(entryName, "..") || StrEqual(entryName, ".") ||	
 			StrEqual(entryName, "/") || StrEqual(entryName, "disabled")) 
@@ -107,9 +108,9 @@ int GetMaphacksFromFolder(const char[] directory)
 			continue;
 		}
 
-		else if(type == FileType_File)
+		if(type == FileType_File)
 		{
-			PushArrayString(activeMaphacks, path);
+			activeMaphacks.PushString(path);
 			count++;
 
 			#if defined DEBUG
@@ -122,15 +123,15 @@ int GetMaphacksFromFolder(const char[] directory)
 
 int GetMaphacksForCurrentLevel()
 {
-	ClearArray(activeMaphacks);
+	activeMaphacks.Clear();
 
 	int count;
 	if(!DirExists(maphackLibrary))
 	{
 		char convarName[CVAR_MAXLEN];
-		GetConVarName(pluginDirectory, convarName, sizeof(convarName));
+		pluginDirectory.GetName(convarName, sizeof(convarName));
 		char pluginDirectoryStr[256];
-		GetConVarString(pluginDirectory, pluginDirectoryStr, sizeof(pluginDirectoryStr));
+		pluginDirectory.GetString(pluginDirectoryStr, sizeof(pluginDirectoryStr));
 		LogError("%s Couldn't find path \"%s\" that %s is specifying.", PLUGIN_PREFIX, maphackLibrary, convarName);
 		return 0;
 	}
@@ -139,12 +140,12 @@ int GetMaphacksForCurrentLevel()
 	GetCurrentMap(map, sizeof(map));
 	GetMapDisplayName(map, map, sizeof(map));
 
-	Handle ls = OpenDirectory(maphackLibrary);
+	DirectoryListing ls = OpenDirectory(maphackLibrary);
 	FileType type;
 
 	//Get folders that match map name, partially or fully  
 	char entry[PLATFORM_MAX_PATH];
-	while(ReadDirEntry(ls, entry, sizeof(entry), type))
+	while(ls.GetNext(entry, sizeof(entry), type))
 	{
 		if(type == FileType_Directory) 
 		{
