@@ -1,8 +1,5 @@
 # NMRiH Maphack Manager
 
-### Note
-- `pre_entities` is not supported at the moment.
-
 A SourceMod alternative to native maphack management
 
 ### Information
@@ -26,3 +23,7 @@ A SourceMod alternative to native maphack management
 Given the map `nmo_cabin`, the maphacks with a green tick will execute every round:
 
 ![Example](README-example.png)
+
+
+### Note
+- `pre_entities` is not supported at the moment.
