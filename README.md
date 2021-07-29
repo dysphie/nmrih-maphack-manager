@@ -1,5 +1,8 @@
 # NMRiH Maphack Manager
 
+### Note
+- `pre_entities` is not supported at the moment.
+
 A SourceMod alternative to native maphack management
 
 ### Information
